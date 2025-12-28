@@ -1,0 +1,210 @@
+You are helping me scaffold an MVP web application called "Ensembl".
+
+Context:
+Ensembl is a UI-first platform for musicians to connect, collaborate, form lightweight ensembles, and apply for local gigs.
+The MVP scope is frozen and must NOT include payments, ratings, AI matching, notifications, uploads, or advanced filters.
+
+Tech Stack (fixed):
+- Frontend: React (Vite) + Tailwind CSS
+- Backend: Python Flask (REST-style)
+- Database: SQLite (dev-ready)
+- Auth: Google OAuth + Email (basic placeholder)
+- Media: External embeds only (YouTube / SoundCloud links)
+- Architecture: Frontend and backend separated
+
+Core UX Philosophy:
+- Jam Board is the homepage
+- Fast onboarding (instrument + city only)
+- Clean, minimal UI
+- Connection first, functionality second
+
+Required MVP Features (ONLY THESE):
+1. Authentication & Onboarding
+   - Google / Email login (mock acceptable)
+   - On signup ask only: instrument, city
+
+2. Lean Musician Profile
+   - Name, photo placeholder
+   - One media embed link (YouTube/SoundCloud)
+   - 3–5 vibe tags
+   - Short bio
+   - Availability toggle (Open to Jam / Not Active)
+
+3. Jam Board (Homepage)
+   - Feed of "Looking For" posts
+   - Each post shows: instrument needed, genre, location, description
+   - Button to message / raise hand
+   - Create Jam Post form
+
+4. Chat (Minimal)
+   - 1-to-1 text chat only
+   - Triggered from Jam Board posts
+
+5. Ensemble (Project Container)
+   - Create ensemble from existing chats
+   - Add/remove members
+   - Name the ensemble
+   - Auto-generated combined profile
+
+6. Venue & Gig Board
+   - Venue profiles: name, location, vibe tags, tech specs
+   - Gig posts: date/time, payment text, description
+   - Ensemble leader applies in one click
+
+7. Gig Handshake (No Payments)
+   - Venue accepts application
+   - Chat opens
+   - Post-gig confirmation: "Did this gig happen?" (Yes/No)
+   - Increment verified gig count
+
+Implementation Instructions:
+- First generate backend folder structure with Flask app, blueprints, models, and routes
+- Then generate frontend folder structure with React components and pages
+- Include clear comments explaining intent of each file
+- Use dummy data where required
+- Do NOT add extra features beyond scope
+- Prioritize clean structure, readability, and extensibility
+
+Output:
+- A full project directory tree
+- Starter Flask app with routes and models
+- Starter React app with pages and components
+- Clear TODO comments for future enhancements
+
+
+Prompt 2
+You are helping me extend the Ensembl MVP to fix core functionality gaps.
+The UI/UX is already built and must NOT be changed unless required for functionality.
+
+Current Issues to Fix:
+1. Users cannot see or interact with other users’ Jam Board posts
+2. Ensembles and Jam Boards behave like isolated dashboards instead of shared spaces
+3. Venue users do not exist yet (only musician login exists)
+4. The full workflow (Musician → Ensemble → Venue → Gig) is broken due to the above
+
+Scope Rules (DO NOT VIOLATE):
+- Do NOT add payments
+- Do NOT add ratings
+- Do NOT add notifications
+- Do NOT add AI or matching logic
+- Do NOT redesign UI
+- Only fix connectivity, visibility, and role separation
+
+---
+
+## REQUIRED CHANGES (IMPLEMENT EXACTLY THESE)
+
+### 1. User Roles (Critical)
+Add a `role` field to the User model:
+- "musician"
+- "venue"
+
+On signup:
+- Default role = "musician"
+- Add an option to create a Venue account (basic toggle)
+
+Ensure:
+- Musicians cannot create venues
+- Venue users cannot post Jam Board entries
+
+---
+
+### 2. Jam Board Must Be Global (Multi-User)
+Fix Jam Board logic so that:
+- Jam posts are GLOBAL, not user-specific
+- Any musician can see ALL jam posts in their city
+- Each JamPost includes:
+  - creator_user_id
+  - instrument_needed
+  - genre
+  - location
+  - description
+  - timestamp
+
+Ensure:
+- Jam Board feed fetches posts from ALL users
+- Clicking a JamPost opens the creator’s profile
+- “Raise Hand” / Message starts a chat with the post creator
+
+---
+
+### 3. Chat Must Work Between Different Users
+Fix chat logic so that:
+- Messages are stored with:
+  - sender_id
+  - receiver_id
+  - timestamp
+- Chats persist across refresh
+- Any two users can chat if:
+  - One clicks “Raise Hand” on a JamPost
+  - OR they are in the same Ensemble
+  - OR a Venue accepts a Gig application
+
+---
+
+### 4. Ensembles Must Be Shared Objects
+Fix Ensemble logic so that:
+- Ensembles are independent entities
+- An Ensemble has:
+  - name
+  - leader_user_id
+  - members (many-to-many with users)
+- All members can:
+  - View the Ensemble
+  - See its Gig applications
+- Only the leader can:
+  - Apply to gigs
+  - Remove members
+
+Ensure:
+- Users can be in multiple Ensembles
+- Ensemble pages show ALL members’ profiles
+
+---
+
+### 5. Venue Users & Gig Board
+Implement Venue user flow:
+
+Venue Users:
+- Can create a Venue profile
+- Can post Gigs
+- Can view Ensemble applications
+- Can accept or reject applications
+
+Gig Applications:
+- Linked to:
+  - Gig ID
+  - Ensemble ID
+  - Status (pending / accepted / rejected)
+
+Ensure:
+- Musicians cannot post gigs
+- Venues cannot apply to gigs
+
+---
+
+### 6. Gig Handshake Completion
+Fix handshake logic so that:
+- After a gig date passes:
+  - Both Venue and Ensemble leader see:
+    “Did this gig happen?” (Yes / No)
+- If both confirm:
+  - Increment `verified_gig_count` for:
+    - Venue
+    - All Ensemble members
+
+---
+
+## IMPLEMENTATION INSTRUCTIONS
+- Update Flask models first (User, JamPost, Ensemble, Venue, Gig, Message)
+- Then update API routes to support multi-user data
+- Then update frontend API calls (do NOT change layout)
+- Add basic authorization checks (role-based access)
+- Use SQLite-compatible queries
+- Add comments explaining multi-user logic
+
+Output expected:
+- Updated models
+- Updated API routes
+- Updated frontend services
+- Clear TODOs where future features may extend logic
