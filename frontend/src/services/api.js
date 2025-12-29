@@ -46,22 +46,59 @@ export const api = {
   searchUsers: (params) => apiRequest(`/users/search?${new URLSearchParams(params)}`),
   
   // Jam Board
-  getJamPosts: (params = {}) => apiRequest(`/jam-board/?${new URLSearchParams(params)}`),
+  getJamPosts: (params = {}) => {
+    const queryParams = typeof params === 'object' ? params : { user_id: params };
+    const cleanParams = Object.fromEntries(
+        Object.entries(queryParams).filter(([_, v]) => v != null)
+    );
+    return apiRequest(`/jam-board/?${new URLSearchParams(cleanParams)}`)
+  },
+  
   createJamPost: (data) => apiRequest('/jam-board/', { method: 'POST', body: JSON.stringify(data) }),
   deleteJamPost: (postId) => apiRequest(`/jam-board/${postId}`, { method: 'DELETE' }),
+
+  toggleRaiseHand: (postId, userId) => apiRequest(`/jam-board/${postId}/raise-hand`, { 
+      method: 'POST', 
+      body: JSON.stringify({ user_id: userId }) 
+  }),
+
+  // Get list of interested people
+  getInterestedMusicians: (postId) => apiRequest(`/jam-board/${postId}/interested`),
   
   // Chat
   getConversations: (userId) => apiRequest(`/chat/conversations/${userId}`),
   getMessages: (userId, otherId) => apiRequest(`/chat/messages/${userId}/${otherId}`),
   sendMessage: (data) => apiRequest('/chat/send', { method: 'POST', body: JSON.stringify(data) }),
   
+  // NEW: Mark conversation as read (clears notification)
+  markConversationAsRead: (userId, otherUserId) => apiRequest(`/chat/mark-read/conversation/${userId}/${otherUserId}`, { method: 'PUT' }),
+
+  // Get unread count
+  getUnreadCount: (userId) => apiRequest(`/chat/unread-count/${userId}`),
+  
+
   // Ensembles
   createEnsemble: (data) => apiRequest('/ensembles/', { method: 'POST', body: JSON.stringify(data) }),
   getEnsemble: (ensembleId) => apiRequest(`/ensembles/${ensembleId}`),
   getUserEnsembles: (userId) => apiRequest(`/ensembles/user/${userId}`),
-  addMember: (ensembleId, data) => apiRequest(`/ensembles/${ensembleId}/members`, { method: 'POST', body: JSON.stringify(data) }),
-  removeMember: (ensembleId, userId) => apiRequest(`/ensembles/${ensembleId}/members/${userId}`, { method: 'DELETE' }),
   
+  // NEW: Invite logic
+  inviteMember: (ensembleId, userId) => apiRequest(`/ensembles/${ensembleId}/invite`, { method: 'POST', body: JSON.stringify({ user_id: userId }) }),
+  
+  acceptInvite: (ensembleId, userId) => apiRequest(`/ensembles/${ensembleId}/accept`, { method: 'POST', body: JSON.stringify({ user_id: userId }) }),
+  
+  // ... existing code ...
+
+  // Update this line in the api object:
+  declineInvite: (ensembleId, userId, requesterId) => 
+      apiRequest(`/ensembles/${ensembleId}/invites/${userId}?requester_id=${requesterId}`, { method: 'DELETE' }),
+
+  // ... existing code ...
+  
+  // Update this line in the api object:
+  removeMember: (ensembleId, userId, requesterId) => 
+      apiRequest(`/ensembles/${ensembleId}/members/${userId}?requester_id=${requesterId}`, { method: 'DELETE' }),
+
   // Gigs
   getGigs: (params = {}) => apiRequest(`/gigs/?${new URLSearchParams(params)}`),
   createGig: (data) => apiRequest('/gigs/', { method: 'POST', body: JSON.stringify(data) }),

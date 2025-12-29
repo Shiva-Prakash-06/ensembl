@@ -39,7 +39,9 @@ frontend/
     │   ├── Navigation.jsx
     │   ├── ProtectedRoute.jsx
     │   ├── JamPostCard.jsx
-    │   └── CreateJamPostModal.jsx
+    │   ├── CreateJamPostModal.jsx
+    |   |── EnsembleInviteModal.jsx  # NEW: Invite musicians to bands
+    │   └── AlertModal.jsx           # NEW: Custom alerts & confirmations
     ├── pages/             # Page components
     │   ├── Login.jsx
     │   ├── Signup.jsx
@@ -66,6 +68,8 @@ frontend/
 - Feed of "Looking For" posts
 - Create new jam posts
 - Message musicians directly
+- View all musicians who raised their hands
+- One-click interest toggle
 
 ### Profile
 - View and edit musician profiles
@@ -77,11 +81,15 @@ frontend/
 - 1-to-1 text messaging
 - Conversations list
 - Real-time-ready structure
+- Accept or Decline band invites directly in chat
+- Notifications when members join, leave, or are removed
+- Red notification count on the navbar
 
 ### Ensembles
 - Create and manage ensembles
 - Add/remove members
 - View verified gig count
+- Search and invite musicians from the Jam Board
 
 ### Gigs
 - Browse gig postings

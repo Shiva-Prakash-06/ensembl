@@ -3,17 +3,49 @@
  * Top navigation bar with links
  */
 
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import api from '../services/api' // Import API
 
 export default function Navigation() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation() // Detect page changes
+  
+  // State for unread messages
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  // Fetch unread count whenever the user navigates or loads the page
+  useEffect(() => {
+    if (user) {
+        fetchUnreadCount();
+    }
+  }, [user, location.pathname]) // Re-run when path changes
+
+  const fetchUnreadCount = async () => {
+    try {
+        const data = await api.getUnreadCount(user.id);
+        setUnreadCount(data.unread_count);
+    } catch (error) {
+        console.error("Failed to get unread count", error);
+    }
+  }
 
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
+
+  // Reusable Notification Badge Component
+  const NotificationBadge = () => {
+      if (unreadCount === 0) return null;
+      return (
+          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+              {unreadCount}
+          </span>
+      );
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -28,45 +60,29 @@ export default function Navigation() {
           <div className="flex items-center space-x-6">
             {user?.role === 'musician' && (
               <>
-                <Link 
-                  to="/" 
-                  className="text-gray-700 hover:text-indigo-600 transition"
-                >
+                <Link to="/" className="text-gray-700 hover:text-indigo-600 transition">
                   Jam Board
                 </Link>
-                <Link 
-                  to="/gigs" 
-                  className="text-gray-700 hover:text-indigo-600 transition"
-                >
+                <Link to="/gigs" className="text-gray-700 hover:text-indigo-600 transition">
                   Gigs
                 </Link>
-                <Link 
-                  to="/ensembles" 
-                  className="text-gray-700 hover:text-indigo-600 transition"
-                >
+                <Link to="/ensembles" className="text-gray-700 hover:text-indigo-600 transition">
                   My Ensembles
                 </Link>
-                <Link 
-                  to="/chat" 
-                  className="text-gray-700 hover:text-indigo-600 transition"
-                >
+                <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition relative">
                   Chat
+                  <NotificationBadge />
                 </Link>
               </>
             )}
             {user?.role === 'venue' && (
               <>
-                <Link 
-                  to="/venue-dashboard" 
-                  className="text-gray-700 hover:text-indigo-600 transition"
-                >
+                <Link to="/venue-dashboard" className="text-gray-700 hover:text-indigo-600 transition">
                   My Gigs
                 </Link>
-                <Link 
-                  to="/chat" 
-                  className="text-gray-700 hover:text-indigo-600 transition"
-                >
+                <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition relative">
                   Messages
+                  <NotificationBadge />
                 </Link>
               </>
             )}

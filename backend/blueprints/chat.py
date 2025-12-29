@@ -100,3 +100,32 @@ def mark_read(message_id):
     db.session.commit()
     
     return jsonify({'message': 'Marked as read'}), 200
+
+
+# NEW ROUTE: Mark whole conversation as read
+@chat_bp.route('/mark-read/conversation/<int:user_id>/<int:other_user_id>', methods=['PUT'])
+def mark_conversation_read(user_id, other_user_id):
+    """
+    Mark ALL messages from 'other_user_id' to 'user_id' as read.
+    This clears the notification when opening the chat.
+    """
+    # Update all messages where receiver is ME (user_id) and sender is THEM (other_user_id)
+    Message.query.filter_by(sender_id=other_user_id, receiver_id=user_id, is_read=False).update({'is_read': True})
+    
+    db.session.commit()
+    return jsonify({'message': 'Conversation marked as read'}), 200
+
+
+@chat_bp.route('/unread-count/<int:user_id>', methods=['GET'])
+def get_unread_count(user_id):
+    """
+    Get the total number of unread messages for a user
+    Used for the red notification badge
+    """
+    # Count messages where user is the receiver AND is_read is False
+    count = Message.query.filter_by(receiver_id=user_id, is_read=False).count()
+    
+    return jsonify({
+        'user_id': user_id,
+        'unread_count': count
+    }), 200

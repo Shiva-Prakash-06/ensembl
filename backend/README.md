@@ -14,8 +14,10 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+3. **Initialize/Reset Database:**
+   *⚠️ Important:* If you have an existing `instance/ensembl.db` file from a previous version, **delete it first**. The new schema (invites, message types) requires a fresh database.
 
-3. Run the application:
+4. Run the application:
 ```bash
 python app.py
 ```
@@ -33,8 +35,8 @@ backend/
 ├── models/               # SQLAlchemy models
 │   ├── user.py          # User/musician profiles
 │   ├── jam_post.py      # Jam Board posts
-│   ├── message.py       # Chat messages
-│   ├── ensemble.py      # Ensembles/bands
+│   ├── message.py       # Chat messages (Updated with Invite logic)
+│   ├── ensemble.py      # Ensembles/bands & Invite tables
 │   ├── venue.py         # Venue profiles
 │   └── gig.py           # Gig postings and applications
 └── blueprints/          # API route handlers
@@ -65,18 +67,25 @@ backend/
 - `POST /api/jam-board/` - Create new jam post
 - `GET /api/jam-board/<id>` - Get single post
 - `DELETE /api/jam-board/<id>` - Close post
+- `POST /api/jam-board/<id>/raise-hand` - Toggle interest
+- `GET /api/jam-board/<id>/interested` - View list of interested musicians
 
 ### Chat
 - `GET /api/chat/conversations/<user_id>` - Get all conversations
 - `GET /api/chat/messages/<user_id>/<other_id>` - Get messages between users
 - `POST /api/chat/send` - Send message
+- `PUT /api/chat/mark-read/conversation/<uid>/<other_id>` - Mark conversation as read
+- `GET /api/chat/unread-count/<user_id>` - Get total unread count (for red badge)
 
 ### Ensembles
 - `POST /api/ensembles/` - Create ensemble
 - `GET /api/ensembles/<id>` - Get ensemble details
 - `POST /api/ensembles/<id>/members` - Add member
-- `DELETE /api/ensembles/<id>/members/<user_id>` - Remove member
 - `GET /api/ensembles/user/<user_id>` - Get user's ensembles
+- `POST /api/ensembles/<id>/invite` - Invite a user to join
+- `POST /api/ensembles/<id>/accept` - Accept an invite
+- `DELETE /api/ensembles/<id>/invites/<user_id>` - Decline an invite
+- `DELETE /api/ensembles/<id>/members/<user_id>` - Remove member (or Leave ensemble)
 
 ### Venues
 - `GET /api/venues/` - Get all venues

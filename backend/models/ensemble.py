@@ -7,13 +7,19 @@ from database import db
 from datetime import datetime
 
 
-# Association table for many-to-many relationship
+# Association table for APPROVED members
 ensemble_members = db.Table('ensemble_members',
     db.Column('ensemble_id', db.Integer, db.ForeignKey('ensembles.id'), primary_key=True),
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
     db.Column('joined_at', db.DateTime, default=datetime.utcnow)
 )
 
+# NEW: Association table for PENDING invites
+ensemble_invites = db.Table('ensemble_invites',
+    db.Column('ensemble_id', db.Integer, db.ForeignKey('ensembles.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('invited_at', db.DateTime, default=datetime.utcnow)
+)
 
 class Ensemble(db.Model):
     """
@@ -36,8 +42,15 @@ class Ensemble(db.Model):
     
     # Relationships
     leader = db.relationship('User', foreign_keys=[leader_id])
+    
+    # 1. Active Members
     members = db.relationship('User', secondary=ensemble_members, 
                             backref=db.backref('ensembles', lazy='dynamic'))
+                            
+    # 2. NEW: Pending Invites (People we sent an invite to)
+    invited_users = db.relationship('User', secondary=ensemble_invites,
+                            backref=db.backref('ensemble_invites', lazy='dynamic'))
+
     gig_applications = db.relationship('GigApplication', back_populates='ensemble', lazy='dynamic')
     
     def to_dict(self):
@@ -54,6 +67,15 @@ class Ensemble(db.Model):
                     'photo_url': member.photo_url
                 }
                 for member in self.members
+            ],
+            # NEW: Include pending invites in the response
+            'invited_users': [
+                {
+                    'id': user.id,
+                    'name': user.name,
+                    'instrument': user.instrument
+                }
+                for user in self.invited_users
             ],
             'combined_bio': self.combined_bio,
             'verified_gig_count': self.verified_gig_count,

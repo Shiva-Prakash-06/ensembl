@@ -24,13 +24,16 @@ export default function JamBoard() {
     }
   }, [user, navigate])
 
+  // Reload posts whenever the user changes (to update "Hand Raised" status)
   useEffect(() => {
     loadPosts()
-  }, [])
+  }, [user])
 
   const loadPosts = async () => {
     try {
-      const data = await api.getJamPosts()
+      // CHANGE 1: Pass user.id so backend knows which hands are raised by THIS user
+      // Note: We will need to update api.js next to handle this argument!
+      const data = await api.getJamPosts(user?.id)
       setPosts(data.posts)
     } catch (error) {
       console.error('Failed to load posts:', error)
@@ -41,7 +44,8 @@ export default function JamBoard() {
 
   const handleCreatePost = async (postData) => {
     try {
-      await api.createJamPost(postData)
+      // Ensure author_id is attached
+      await api.createJamPost({ ...postData, author_id: user.id })
       setIsModalOpen(false)
       loadPosts() // Reload posts
     } catch (error) {
@@ -61,12 +65,16 @@ export default function JamBoard() {
           <h1 className="text-3xl font-bold text-gray-900">Jam Board</h1>
           <p className="text-gray-600 mt-1">Find musicians to jam with</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
-        >
-          + Create Post
-        </button>
+        
+        {/* Only Musicians see the Create Post button */}
+        {user?.role === 'musician' && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
+          >
+            + Create Post
+          </button>
+        )}
       </div>
 
       {/* Posts Grid */}
@@ -75,12 +83,14 @@ export default function JamBoard() {
       ) : posts.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-600 mb-4">No posts yet. Be the first to post!</p>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="text-indigo-600 hover:text-indigo-700 font-medium"
-          >
-            Create a post
-          </button>
+          {user?.role === 'musician' && (
+             <button
+               onClick={() => setIsModalOpen(true)}
+               className="text-indigo-600 hover:text-indigo-700 font-medium"
+             >
+               Create a post
+             </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -89,18 +99,20 @@ export default function JamBoard() {
               key={post.id}
               post={post}
               onMessage={handleMessage}
+              // CHANGE 2: Pass the current user ID to the card
+              currentUserId={user?.id}
             />
           ))}
         </div>
       )}
 
-      {/* Create Post Modal */}
-      <CreateJamPostModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreatePost}
-        userId={user?.id}
-      />
+      {/* CHANGE 3: Conditional Rendering for the Modal */}
+      {isModalOpen && (
+        <CreateJamPostModal
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreatePost}
+        />
+      )}
     </div>
   )
 }
