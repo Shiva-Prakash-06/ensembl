@@ -51,7 +51,7 @@ export default function JamPostCard({ post, onMessage, currentUserId }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition mb-4 relative">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 card-hover-lift transition mb-4 relative animate-fade-in">
       {/* Author Info */}
       <div className="flex items-center mb-4">
         <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mr-3">

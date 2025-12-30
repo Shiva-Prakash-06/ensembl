@@ -1,34 +1,64 @@
 /**
  * Navigation Component
- * Top navigation bar with links
+ * 
+ * Phase 3: Enhanced with visual state indicators
+ * Shows badges for:
+ * - Unread messages
+ * - Pending ensemble invites
+ * - Gig application updates
  */
 
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import api from '../services/api' // Import API
+import api from '../services/api'
 
 export default function Navigation() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation() // Detect page changes
+  const location = useLocation()
   
-  // State for unread messages
+  // State for indicators
   const [unreadCount, setUnreadCount] = useState(0)
+  const [hasPendingInvites, setHasPendingInvites] = useState(false)
+  const [hasGigUpdates, setHasGigUpdates] = useState(false)
 
-  // Fetch unread count whenever the user navigates or loads the page
+  // Fetch indicator states whenever the user navigates
   useEffect(() => {
     if (user) {
-        fetchUnreadCount();
+      fetchIndicators()
     }
-  }, [user, location.pathname]) // Re-run when path changes
+  }, [user, location.pathname])
 
-  const fetchUnreadCount = async () => {
+  const fetchIndicators = async () => {
     try {
-        const data = await api.getUnreadCount(user.id);
-        setUnreadCount(data.unread_count);
+      // 1. Unread message count
+      const unreadData = await api.getUnreadCount(user.id)
+      setUnreadCount(unreadData.unread_count)
+
+      // 2. Check for pending ensemble invites (musician only)
+      if (user.role === 'musician') {
+        const conversations = await api.getConversations(user.id)
+        let hasPending = false
+        
+        for (const conv of conversations.conversations || []) {
+          const messages = await api.getMessages(user.id, conv.other_user.id)
+          const pendingInvites = messages.messages?.filter(
+            msg => msg.msg_type === 'invite' && 
+                   msg.invite_status === 'pending' &&
+                   msg.receiver_id === user.id
+          ) || []
+          
+          if (pendingInvites.length > 0) {
+            hasPending = true
+            break
+          }
+        }
+        
+        setHasPendingInvites(hasPending)
+      }
     } catch (error) {
-        console.error("Failed to get unread count", error);
+      console.error("Failed to fetch indicators", error)
     }
   }
 
@@ -37,15 +67,23 @@ export default function Navigation() {
     navigate('/login')
   }
 
-  // Reusable Notification Badge Component
-  const NotificationBadge = () => {
-      if (unreadCount === 0) return null;
-      return (
-          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-              {unreadCount}
-          </span>
-      );
-  };
+  // Notification Badge Component (count-based)
+  const NotificationBadge = ({ count }) => {
+    if (!count || count === 0) return null
+    return (
+      <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+        {count > 99 ? '99+' : count}
+      </span>
+    )
+  }
+
+  // Indicator Dot Component (presence-based)
+  const IndicatorDot = ({ show }) => {
+    if (!show) return null
+    return (
+      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-white"></span>
+    )
+  }
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -60,29 +98,31 @@ export default function Navigation() {
           <div className="flex items-center space-x-6">
             {user?.role === 'musician' && (
               <>
-                <Link to="/" className="text-gray-700 hover:text-indigo-600 transition">
+                <Link to="/" className="text-gray-700 hover:text-indigo-600 transition font-medium">
                   Jam Board
                 </Link>
-                <Link to="/gigs" className="text-gray-700 hover:text-indigo-600 transition">
+                <Link to="/gigs" className="text-gray-700 hover:text-indigo-600 transition font-medium relative">
                   Gigs
+                  <IndicatorDot show={hasGigUpdates} />
                 </Link>
-                <Link to="/ensembles" className="text-gray-700 hover:text-indigo-600 transition">
-                  My Ensembles
+                <Link to="/ensembles" className="text-gray-700 hover:text-indigo-600 transition font-medium relative">
+                  Ensembles
+                  <IndicatorDot show={hasPendingInvites} />
                 </Link>
-                <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition relative">
+                <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition font-medium relative">
                   Chat
-                  <NotificationBadge />
+                  <NotificationBadge count={unreadCount} />
                 </Link>
               </>
             )}
             {user?.role === 'venue' && (
               <>
-                <Link to="/venue-dashboard" className="text-gray-700 hover:text-indigo-600 transition">
+                <Link to="/venue-dashboard" className="text-gray-700 hover:text-indigo-600 transition font-medium">
                   My Gigs
                 </Link>
-                <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition relative">
+                <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition font-medium relative">
                   Messages
-                  <NotificationBadge />
+                  <NotificationBadge count={unreadCount} />
                 </Link>
               </>
             )}

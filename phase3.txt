@@ -1,0 +1,113 @@
+You are helping me implement Phase 3 of the Ensembl MVP.
+
+Phase Name: Awareness, Feedback & Emotional UX
+
+Context:
+- Ensembl MVP is functionally complete
+- Phase 2 (Venue Confidence & Booking Readiness) is complete
+- Backend and database MUST NOT be changed
+- This phase is frontend-only
+- Goal: Improve user awareness, feedback, and emotional engagement
+
+STRICT RULES:
+- DO NOT add real notification systems
+- DO NOT add backend events or polling
+- DO NOT add WebSockets
+- DO NOT add emails
+- DO NOT change existing APIs
+- DO NOT break minimalist design
+
+---
+
+## REQUIRED IMPLEMENTATIONS
+
+### 1. Activity Feed (Soft Notifications)
+Implement a "Recent Activity" panel for:
+- Musician Dashboard
+- Venue Dashboard
+
+Activity items should be derived from existing data:
+- New unread messages
+- Ensemble invites received
+- Invite accepted / declined
+- Gig application accepted / rejected
+- Gig confirmed by both parties
+
+UI Requirements:
+- Simple vertical list
+- Timestamp (relative time)
+- Icon per activity type
+- Empty state message
+
+---
+
+### 2. Visual State Indicators
+Add subtle indicators:
+- Dot or badge on Navbar items when attention is needed
+- Examples:
+  - Chat tab: unread messages
+  - Ensembles tab: pending invites
+  - Gigs tab: status changes
+
+Indicators must:
+- Be non-intrusive
+- Use existing state/data
+- Clear automatically when viewed
+
+---
+
+### 3. Contextual Feedback Banners
+Replace generic alerts with inline banners:
+- Success (green)
+- Info (blue/purple)
+- Warning (amber)
+
+Examples:
+- “Your ensemble was accepted for this gig 🎉”
+- “You’ve been invited to join an ensemble”
+
+Banners should:
+- Be dismissible
+- Auto-hide on navigation
+
+---
+
+### 4. UI Micro-interactions
+Add subtle motion:
+- Card hover lift
+- Button press feedback
+- Fade-in transitions
+- Skeleton loaders for async content
+
+Use Tailwind-compatible animations only.
+
+---
+
+### 5. Creative Microcopy
+Improve empty states and helper text to feel:
+- Musical
+- Friendly
+- Encouraging
+
+Avoid jokes or sarcasm.
+Maintain professional tone.
+
+---
+
+## IMPLEMENTATION ORDER
+1. Activity Feed
+2. Navbar indicators
+3. Feedback banners
+4. Micro-interactions
+5. Microcopy polish
+
+---
+
+## OUTPUT EXPECTED
+- Frontend-only changes
+- New reusable components if needed
+- Clear comments explaining UX intent
+- TODOs only for post-MVP ideas
+
+Remember:
+This phase exists to make Ensembl feel alive, confident, and self-guiding.

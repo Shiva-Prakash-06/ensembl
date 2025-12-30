@@ -1,0 +1,116 @@
+You are helping me implement Phase 2 of the Ensembl MVP.
+
+Phase Name: Venue Confidence & Booking Readiness
+
+Context:
+- Ensembl MVP is feature-complete
+- All backend APIs already exist and MUST NOT be changed
+- No new models, routes, or database fields are allowed
+- The goal is to improve venue-side usability and booking confidence
+- This phase is UI/UX-first, functionality-second
+
+STRICT SCOPE RULES:
+- DO NOT add payments
+- DO NOT add ratings or reviews
+- DO NOT add notifications
+- DO NOT add real-time features
+- DO NOT redesign the overall UI theme
+- DO NOT touch authentication or database models
+
+You may ONLY:
+- Recompose existing data in new views
+- Improve clarity, layout, and information hierarchy
+- Add frontend-only helper logic if needed
+
+---
+
+## REQUIRED IMPLEMENTATIONS
+
+### 1. Venue Dashboard (Frontend Only)
+Create a Venue Dashboard view using existing gig and application APIs.
+
+The dashboard should display:
+- Active Gigs (open and upcoming)
+- Each gig card should show:
+  - Gig title
+  - Date & time
+  - Number of ensemble applications
+- Pending Applications section
+- Accepted Ensembles section
+- Verified Gig Count (already available on Venue model)
+
+UX Requirements:
+- Clear section headers
+- Empty state messages (e.g. “No active gigs yet”)
+- Fast scannability
+
+---
+
+### 2. Improve Gig Applications View (Venue Side)
+Enhance the gig applications list so venues can make decisions quickly.
+
+Each Ensemble application card should show:
+- Ensemble name
+- Member count
+- Instruments represented
+- Verified gig count
+- Combined bio snippet
+- Media embed preview (if available)
+
+Actions:
+- Accept
+- Reject
+
+DO NOT change application logic — only presentation.
+
+---
+
+### 3. Ensemble Credibility Signals (Surface Existing Data)
+Wherever an Ensemble is shown to a Venue:
+- Highlight verified_gig_count prominently
+- Show member list with instruments
+- Display “Past verified gigs” count clearly
+
+No new metrics. Use existing fields only.
+
+---
+
+### 4. Application Comparison UX
+When a gig has multiple applications:
+- Present them as stacked cards
+- Ensure consistent layout for easy comparison
+- Make Accept / Reject buttons visually distinct
+
+Goal:
+Enable venues to compare applications without clicking into each one.
+
+---
+
+### 5. Copy & Micro-UX Improvements
+Improve text labels and helper copy ONLY where it helps clarity.
+
+Examples:
+- “Apply” → “Apply as Ensemble”
+- “Accept” → “Accept & Start Chat”
+- Empty states that guide action
+
+No branding or tone overhaul.
+
+---
+
+## IMPLEMENTATION ORDER (IMPORTANT)
+1. Venue Dashboard layout
+2. Gig Applications card redesign
+3. Ensemble credibility surfacing
+4. Empty states & microcopy polish
+
+---
+
+## OUTPUT EXPECTED
+- New or updated frontend components only
+- Clear comments explaining intent
+- Zero backend changes
+- TODO comments only for post-MVP ideas
+
+Remember:
+This phase exists to increase VENUE TRUST and SPEED TO BOOKING.

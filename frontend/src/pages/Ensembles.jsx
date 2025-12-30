@@ -114,7 +114,7 @@ export default function Ensembles() {
         </div>
         <button
           onClick={() => setIsCreating(true)}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
+          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium button-press"
         >
           + Create Ensemble
         </button>
@@ -159,72 +159,115 @@ export default function Ensembles() {
 
       {/* Ensembles List */}
       {ensembles.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-600 mb-4">You're not part of any ensembles yet</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center animate-fade-in">
+          <div className="text-gray-400 text-5xl mb-4">🎭</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No ensembles yet</h3>
+          <p className="text-gray-600 mb-6">
+            The stage awaits! Create your first ensemble to start jamming and gigging together.
+          </p>
           <button
             onClick={() => setIsCreating(true)}
-            className="text-indigo-600 hover:text-indigo-700 font-medium"
+            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium button-press"
           >
-            Create your first ensemble
+            Form Your Band
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {ensembles.map((ensemble) => (
-            <div key={ensemble.id} className="bg-white rounded-lg shadow-md p-6 relative">
+            <div key={ensemble.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6 relative card-hover-lift transition animate-fade-in">
               <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">{ensemble.name}</h3>
-                  {ensemble.leader_id === user.id ? (
-                    <span className="text-sm text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded">Leader</span>
-                  ) : (
-                    <span className="text-sm text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded">Member</span>
-                  )}
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{ensemble.name}</h3>
+                  <div className="flex items-center gap-2">
+                    {ensemble.leader_id === user.id ? (
+                      <span className="text-sm text-indigo-600 font-medium bg-indigo-50 px-3 py-1 rounded-full">👑 Leader</span>
+                    ) : (
+                      <span className="text-sm text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">Member</span>
+                    )}
+                  </div>
                 </div>
                 
-                {/* Leave Button (If I am NOT the leader) */}
-                {ensemble.leader_id !== user.id && (
-                    <button 
-                        onClick={() => confirmRemoveMember(ensemble.id, user.id, true)}
-                        className="text-red-600 hover:text-red-800 text-xs font-medium underline"
-                    >
-                        Leave
-                    </button>
-                )}
+                {/* Verified Gig Count Badge */}
+                <div className="bg-indigo-50 rounded-lg px-4 py-2 text-center">
+                  <div className="text-2xl font-bold text-indigo-600">
+                    {ensemble.verified_gig_count || 0}
+                  </div>
+                  <div className="text-xs text-indigo-700 font-medium whitespace-nowrap">
+                    Verified Gigs
+                  </div>
+                </div>
               </div>
+
+              {/* Combined Bio */}
+              {ensemble.combined_bio && (
+                <div className="mb-4 pb-4 border-b border-gray-200">
+                  <p className="text-sm text-gray-700 line-clamp-2">{ensemble.combined_bio}</p>
+                </div>
+              )}
 
               {/* Members */}
               <div className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Members</h4>
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-sm font-semibold text-gray-700">
+                    Members ({ensemble.members?.length || 0})
+                  </h4>
+                  {/* Leave Button (If I am NOT the leader) */}
+                  {ensemble.leader_id !== user.id && (
+                    <button 
+                      onClick={() => confirmRemoveMember(ensemble.id, user.id, true)}
+                      className="text-red-600 hover:text-red-700 text-xs font-medium px-2 py-1 rounded hover:bg-red-50 transition"
+                    >
+                      Leave Ensemble
+                    </button>
+                  )}
+                </div>
                 <div className="space-y-2">
-                  {ensemble.members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <span className="text-indigo-600 text-xs font-semibold">
-                            {member.name.charAt(0)}
+                  {ensemble.members?.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center">
+                          <span className="text-indigo-600 text-sm font-bold">
+                            {member.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                          <p className="text-xs text-gray-500">{member.instrument}</p>
+                          <p className="text-xs text-gray-600">🎵 {member.instrument || 'Musician'}</p>
                         </div>
                       </div>
 
                       {/* Remove Button: Only show if I am Leader AND removing someone else */}
                       {ensemble.leader_id === user.id && member.id !== user.id && (
-                          <button 
-                            onClick={() => confirmRemoveMember(ensemble.id, member.id)}
-                            className="text-red-500 hover:text-red-700 text-xs font-medium px-2 py-1 hover:bg-red-50 rounded transition"
-                            title="Remove Member"
-                          >
-                            Remove
-                          </button>
+                        <button 
+                          onClick={() => confirmRemoveMember(ensemble.id, member.id)}
+                          className="text-red-500 hover:text-red-700 text-xs font-medium px-3 py-1.5 hover:bg-red-50 rounded transition"
+                          title="Remove Member"
+                        >
+                          Remove
+                        </button>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* Media Link Preview */}
+              {ensemble.combined_media && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <a
+                    href={ensemble.combined_media}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-2"
+                  >
+                    🎧 Listen to our music
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              )}
             </div>
           ))}
         </div>
