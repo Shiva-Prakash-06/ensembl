@@ -14,6 +14,7 @@ from blueprints.chat import chat_bp
 from blueprints.ensembles import ensembles_bp
 from blueprints.venues import venues_bp
 from blueprints.gigs import gigs_bp
+from blueprints.admin import admin_bp
 
 
 def create_app(config_class=Config):
@@ -35,6 +36,7 @@ def create_app(config_class=Config):
     app.register_blueprint(ensembles_bp, url_prefix='/api/ensembles')
     app.register_blueprint(venues_bp, url_prefix='/api/venues')
     app.register_blueprint(gigs_bp, url_prefix='/api/gigs')
+    app.register_blueprint(admin_bp)  # Admin blueprint has its own prefix
     
     # Create tables on first run
     with app.app_context():

@@ -1,0 +1,98 @@
+You are helping me implement an INTERNAL Admin system for the Ensembl MVP.
+
+Phase Name: Internal Admin & Platform Oversight
+
+Context:
+- Ensembl MVP is feature-complete (Phases 1–3)
+- Admin is NOT a public-facing feature
+- This is an internal tool for business and developers
+- Must follow ethical and privacy-safe practices
+
+STRICT RULES:
+- Admin must NOT view private chat messages
+- Admin must NOT see sensitive personal data
+- Admin must NOT impersonate users
+- Admin must NOT hard-delete data
+- All admin actions must be reversible (soft disable)
+
+---
+
+## ADMIN AUTHENTICATION
+
+Implement:
+- Admin role = "admin" in User model
+- No admin signup from UI
+- Admin account created via seed script or environment variable
+- Separate /admin/login route
+
+---
+
+## ADMIN PERMISSIONS
+
+Admin can:
+- View users, venues, ensembles, gigs
+- See aggregate analytics
+- Soft-disable users, venues, gigs, ensembles
+- View verified gig counts
+- View activity metrics
+
+Admin cannot:
+- Read chat messages
+- Edit content
+- Accept/reject gigs
+- Modify payments (none exist)
+
+---
+
+## REQUIRED BACKEND IMPLEMENTATION
+
+1. Add admin_required decorator
+2. Create admin blueprints:
+   - /api/admin/users
+   - /api/admin/venues
+   - /api/admin/ensembles
+   - /api/admin/gigs
+   - /api/admin/analytics
+
+Endpoints should:
+- Return summarized, non-sensitive data
+- Mask emails (e.g. sh***@gmail.com)
+- Support soft-disable actions via is_active flag
+
+---
+
+## REQUIRED FRONTEND IMPLEMENTATION
+
+Create Admin Dashboard with pages:
+- AdminDashboard.jsx
+- AdminUsers.jsx
+- AdminVenues.jsx
+- AdminEnsembles.jsx
+- AdminGigs.jsx
+- AdminAnalytics.jsx
+
+Dashboard must show:
+- User counts (musician vs venue)
+- Active vs inactive users
+- Total jam posts
+- Active ensembles
+- Open gigs
+- Completed gigs
+
+UI Requirements:
+- Table-based layouts
+- Clear labels
+- Confirmation modal for disable actions
+- Neutral, internal-tool design
+
+---
+
+## IMPLEMENTATION NOTES
+- Reuse existing API services where possible
+- Admin routes should be protected via role check
+- Add comments explaining ethical boundaries
+- Add TODOs only for post-MVP admin extensions
+
+Remember:
+This admin system exists to OBSERVE, CONTROL SAFELY, and ANALYSE —
+not to spy or interfere with user trust.

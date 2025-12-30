@@ -6,6 +6,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
+import AdminLayout from './components/AdminLayout'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import JamBoard from './pages/JamBoard'
@@ -15,6 +16,12 @@ import Ensembles from './pages/Ensembles'
 import Gigs from './pages/Gigs'
 import VenueProfile from './pages/VenueProfile'
 import VenueDashboard from './pages/VenueDashboard'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminUsers from './pages/AdminUsers'
+import AdminVenues from './pages/AdminVenues'
+import AdminEnsembles from './pages/AdminEnsembles'
+import AdminGigs from './pages/AdminGigs'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -25,6 +32,14 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          
+          {/* Admin routes (separate from main app) */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+          <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+          <Route path="/admin/venues" element={<AdminLayout><AdminVenues /></AdminLayout>} />
+          <Route path="/admin/ensembles" element={<AdminLayout><AdminEnsembles /></AdminLayout>} />
+          <Route path="/admin/gigs" element={<AdminLayout><AdminGigs /></AdminLayout>} />
           
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
