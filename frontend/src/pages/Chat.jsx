@@ -228,12 +228,16 @@ export default function Chat() {
                     <p className="text-sm text-gray-500">{selectedUser.instrument}</p>
                     </div>
                 </div>
-                <button 
-                    onClick={() => setShowInviteModal(true)}
-                    className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 transition"
-                >
-                    + Invite to Ensemble
-                </button>
+                
+                {/* UPDATED: Only show Invite button if current user is a MUSICIAN */}
+                {user?.role === 'musician' && (
+                    <button 
+                        onClick={() => setShowInviteModal(true)}
+                        className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 transition"
+                    >
+                        + Invite to Ensemble
+                    </button>
+                )}
               </div>
 
               {/* Messages Stream */}

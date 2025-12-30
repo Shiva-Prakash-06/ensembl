@@ -121,16 +121,36 @@ export default function VenueDashboard() {
     }
   }
 
+  // ... (imports remain the same)
+
+// ... (inside VenueDashboard component)
+
   const handleAcceptApplication = async (applicationId) => {
     try {
-      await api.acceptApplication(applicationId)
+      // 1. Call API to accept
+      const response = await api.acceptApplication(applicationId)
+      
       showBanner('success', 'Application accepted! Chat is now open.')
-      loadData() // Reload to update status
+      
+      // 2. Redirect to Chat with the Ensemble Leader
+      // The backend now returns 'chat_with_id'
+      if (response.chat_with_id) {
+          // Small delay to let the banner be seen, then go
+          setTimeout(() => {
+              navigate(`/chat/${response.chat_with_id}`);
+          }, 1000);
+      } else {
+          // Fallback if ID missing for some reason
+          loadData(); 
+      }
+
     } catch (error) {
       console.error('Failed to accept application:', error)
       showBanner('error', error.message)
     }
   }
+
+// ... (rest of the file remains the same)
 
   const handleRejectApplication = async (applicationId) => {
     try {

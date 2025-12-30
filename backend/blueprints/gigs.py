@@ -8,6 +8,7 @@ from database import db
 from models.gig import Gig, GigApplication
 from models.venue import Venue
 from models.ensemble import Ensemble
+from models.message import Message # <--- Added Import
 from datetime import datetime
 
 gigs_bp = Blueprint('gigs', __name__)
@@ -151,24 +152,42 @@ def get_gig_applications(gig_id):
 def accept_application(application_id):
     """
     Venue accepts an ensemble's application
-    This triggers the Gig Handshake flow
-    TODO: Open chat between venue and ensemble leader
+    1. Update status to 'accepted'
+    2. Close the gig
+    3. Auto-create a chat message from Venue -> Ensemble Leader
+    4. Return Leader ID for redirect
     """
     application = GigApplication.query.get(application_id)
     if not application:
         return jsonify({'error': 'Application not found'}), 404
     
+    # 1. Update Status
     application.status = 'accepted'
     
-    # Close the gig to other applications
+    # 2. Close the gig
     gig = application.gig
     gig.is_open = False
+
+    # 3. Create Initial Chat Message (Venue Owner -> Ensemble Leader)
+    venue_owner_id = gig.venue.user_id
+    ensemble_leader_id = application.ensemble.leader_id
+
+    # Check if we should create a greeting message
+    # We do this so the conversation immediately appears in the Chat list
+    start_msg = Message(
+        sender_id=venue_owner_id,
+        receiver_id=ensemble_leader_id,
+        content=f"Application accepted for '{gig.title}'. Let's discuss details!",
+        msg_type='text'
+    )
+    db.session.add(start_msg)
     
     db.session.commit()
     
     return jsonify({
         'message': 'Application accepted! Chat opened.',
-        'application': application.to_dict()
+        'application': application.to_dict(),
+        'chat_with_id': ensemble_leader_id # <--- Return this for the frontend
     }), 200
 
 
