@@ -15,6 +15,7 @@ from blueprints.ensembles import ensembles_bp
 from blueprints.venues import venues_bp
 from blueprints.gigs import gigs_bp
 from blueprints.admin import admin_bp
+from blueprints.analytics import analytics_bp  # Phase 5
 
 
 def create_app(config_class=Config):
@@ -37,6 +38,7 @@ def create_app(config_class=Config):
     app.register_blueprint(venues_bp, url_prefix='/api/venues')
     app.register_blueprint(gigs_bp, url_prefix='/api/gigs')
     app.register_blueprint(admin_bp)  # Admin blueprint has its own prefix
+    app.register_blueprint(analytics_bp)  # Phase 5: Analytics blueprint
     
     # Create tables on first run
     with app.app_context():

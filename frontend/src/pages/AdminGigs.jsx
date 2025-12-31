@@ -70,8 +70,9 @@ export default function AdminGigs() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">All Gigs</option>
-              <option value="open">Open</option>
-              <option value="closed">Closed</option>
+              <option value="open">Open (No Ensemble)</option>
+              <option value="accepted">Accepted (Booked)</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
@@ -126,24 +127,30 @@ export default function AdminGigs() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        gig.is_open
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
+                        gig.status === 'completed'
+                          ? 'bg-purple-100 text-purple-700'
+                          : gig.status === 'accepted'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-green-100 text-green-700'
                       }`}>
-                        {gig.is_open ? 'Open' : 'Closed'}
+                        {gig.status === 'completed' ? 'Completed' : gig.status === 'accepted' ? 'Accepted (Booked)' : 'Open'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <button
-                        onClick={() => setConfirmModal(gig)}
-                        className={`px-3 py-1 rounded ${
-                          gig.is_open
-                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        } transition text-xs font-medium`}
-                      >
-                        {gig.is_open ? 'Close' : 'Reopen'}
-                      </button>
+                      {gig.status === 'completed' ? (
+                        <span className="text-gray-400 text-xs">Completed</span>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmModal(gig)}
+                          className={`px-3 py-1 rounded ${
+                            gig.is_open
+                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          } transition text-xs font-medium`}
+                        >
+                          {gig.is_open ? 'Close Apps' : 'Reopen Apps'}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -181,8 +188,13 @@ export default function AdminGigs() {
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Action</h3>
             <p className="text-gray-700 mb-6">
-              Are you sure you want to {confirmModal.is_open ? 'close' : 'reopen'}{' '}
+              Are you sure you want to {confirmModal.is_open ? 'close applications for' : 'reopen applications for'}{' '}
               <strong>{confirmModal.title}</strong>?
+              {confirmModal.is_open && (
+                <span className="block mt-2 text-sm text-gray-600">
+                  This will prevent new ensembles from applying. The gig will still be visible.
+                </span>
+              )}
             </p>
             <div className="flex gap-3">
               <button
@@ -199,7 +211,7 @@ export default function AdminGigs() {
                     : 'bg-green-600 hover:bg-green-700'
                 }`}
               >
-                {confirmModal.is_open ? 'Close Gig' : 'Reopen Gig'}
+                {confirmModal.is_open ? 'Close Applications' : 'Reopen Applications'}
               </button>
             </div>
           </div>

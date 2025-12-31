@@ -107,6 +107,7 @@ export const api = {
   acceptApplication: (appId) => apiRequest(`/gigs/applications/${appId}/accept`, { method: 'PUT' }),
   rejectApplication: (appId) => apiRequest(`/gigs/applications/${appId}/reject`, { method: 'PUT' }),
   confirmGig: (appId, data) => apiRequest(`/gigs/applications/${appId}/confirm`, { method: 'PUT', body: JSON.stringify(data) }),
+  markGigCompleted: (gigId) => apiRequest(`/gigs/${gigId}/mark-completed`, { method: 'PUT' }),
   
   // Venues
   getVenues: () => apiRequest('/venues/'),

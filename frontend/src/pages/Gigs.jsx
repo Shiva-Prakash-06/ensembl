@@ -164,11 +164,15 @@ export default function Gigs() {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-xl font-bold text-gray-900">{gig.title}</h3>
                   <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                    gig.is_open 
+                    gig.status === 'completed'
+                      ? 'bg-purple-100 text-purple-700'
+                      : gig.status === 'accepted'
+                      ? 'bg-blue-100 text-blue-700'
+                      : gig.is_open 
                       ? 'bg-green-100 text-green-700' 
                       : 'bg-gray-100 text-gray-600'
                   }`}>
-                    {gig.is_open ? 'OPEN' : 'CLOSED'}
+                    {gig.status === 'completed' ? 'COMPLETED' : gig.status === 'accepted' ? 'BOOKED' : gig.is_open ? 'OPEN' : 'APPS CLOSED'}
                   </span>
                 </div>
                 <p className="text-gray-700 font-medium">{gig.venue.name}</p>

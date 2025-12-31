@@ -1,0 +1,100 @@
+You are helping me implement Phase 5 of the Ensembl MVP.
+
+Phase Name: Workflow Integrity & Analytics Differentiation
+
+Context:
+- Ensembl MVP Phases 1–4 are complete
+- This phase fixes gig lifecycle issues and introduces analytics
+- Payments and AI are explicitly OUT OF SCOPE
+- Admin already exists
+
+STRICT RULES:
+- Do NOT add payments
+- Do NOT add AI or ML
+- Do NOT add real subscription billing
+- Pro access is controlled ONLY via admin toggle
+- No breaking changes to existing workflows
+
+---
+
+## PART 1: GIG WORKFLOW FIX
+
+### Required Changes
+1. Update Gig model:
+   - Add `status` field with values: open, accepted, completed
+   - Add `completed_at` timestamp (nullable)
+
+2. Venue Action:
+   - After accepting an ensemble and after gig date:
+     - Venue sees "Mark as Completed" button
+   - This sets:
+     - gig.status = "completed"
+     - gig.completed_at = now
+
+3. Handshake Logic:
+   - Gig completion unlocks existing handshake confirmation
+   - Admin dashboard must show gig status correctly:
+     - Open
+     - Accepted
+     - Completed
+
+DO NOT delete or hide accepted gigs prematurely.
+
+---
+
+## PART 2: PRO SUBSCRIPTION FLAG (ADMIN ONLY)
+
+1. Update User model:
+   - Add `is_pro` boolean (default false)
+
+2. Admin Dashboard:
+   - Admin can toggle Pro ON/OFF for any user (musician or venue)
+
+3. Access Control:
+   - Analytics endpoints check `is_pro`
+   - If false, return limited data
+
+---
+
+## PART 3: ANALYTICS (NO AI)
+
+### Musician Analytics (Pro Only)
+- Total gigs played
+- Gigs per month (trend)
+- Acceptance rate
+- Most-played genres
+- Most frequent collaborators
+
+### Venue Analytics (Pro Only)
+- Gigs hosted per month
+- Acceptance → completion rate
+- Most-booked ensembles
+- Popular genres
+- Repeat musician ratio
+
+Free users:
+- See only basic counts
+- Show teaser UI prompting Pro access
+
+---
+
+## FRONTEND REQUIREMENTS
+- Add Analytics pages:
+  - MusicianAnalytics.jsx
+  - VenueAnalytics.jsx
+- Use simple charts (no heavy libs)
+- Graceful fallback for Free users
+- Clear Pro badges and lock icons
+
+---
+
+## OUTPUT EXPECTED
+- Updated models
+- Updated admin controls
+- New analytics endpoints
+- New analytics UI
+- Clear comments explaining logic
+- TODOs only for future payment integration
+
+Remember:
+This phase exists to fix WORKFLOW TRACEABILITY and show REAL VALUE in PRO — not to add complexity.

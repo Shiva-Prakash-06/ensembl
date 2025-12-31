@@ -1,0 +1,41 @@
+/* Venue Analytics Page - shares styles with Musician Analytics */
+@import './MusicianAnalytics.css';
+
+/* Additional venue-specific styles if needed */
+.top-ensembles-list {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ensemble-item {
+  display: grid;
+  grid-template-columns: 50px 1fr 100px;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.ensemble-item:last-child {
+  border-bottom: none;
+}
+
+.ensemble-rank {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.ensemble-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ensemble-gigs {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: right;
+}

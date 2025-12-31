@@ -47,6 +47,16 @@ export default function AdminUsers() {
     }
   }
 
+  const handleTogglePro = async (userId) => {
+    try {
+      await adminApi.toggleUserPro(userId)
+      loadUsers() // Reload list
+    } catch (error) {
+      console.error('Failed to toggle Pro status:', error)
+      alert(error.message)
+    }
+  }
+
   const openConfirmModal = (user) => {
     setConfirmModal(user)
   }
@@ -145,6 +155,9 @@ export default function AdminUsers() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Pro
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Actions
                   </th>
                 </tr>
@@ -184,6 +197,18 @@ export default function AdminUsers() {
                       }`}>
                         {user.is_active ? 'Active' : 'Inactive'}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        onClick={() => handleTogglePro(user.id)}
+                        className={`px-3 py-1 rounded ${
+                          user.is_pro
+                            ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        } transition text-xs font-medium`}
+                      >
+                        {user.is_pro ? '✨ Pro' : 'Free'}
+                      </button>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <button

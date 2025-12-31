@@ -14,6 +14,31 @@ from flask import request, jsonify
 from models.user import User
 
 
+def login_required(f):
+    """
+    Decorator to protect routes that require any authenticated user
+    Checks if user_id header is present and valid
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Get user_id from request headers (cookie in production)
+        user_id = request.headers.get('X-User-Id')
+        
+        if not user_id:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        # Check if user exists
+        user = User.query.get(user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Pass current user to the route
+        return f(current_user=user, *args, **kwargs)
+    
+    return decorated_function
+
+
 def admin_required(f):
     """
     Decorator to protect admin-only routes

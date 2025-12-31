@@ -129,7 +129,7 @@ export default function AdminDashboard() {
       {/* Gig Metrics */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Gig Activity</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricCard
             title="Open Gigs"
             value={content.gigs.open}
@@ -138,11 +138,18 @@ export default function AdminDashboard() {
             textColor="text-green-700"
           />
           <MetricCard
+            title="Accepted (Booked)"
+            value={content.gigs.accepted || 0}
+            icon="📅"
+            color="bg-blue-50"
+            textColor="text-blue-700"
+          />
+          <MetricCard
             title="Completed Gigs"
             value={content.gigs.completed}
             icon="✓"
-            color="bg-blue-50"
-            textColor="text-blue-700"
+            color="bg-purple-50"
+            textColor="text-purple-700"
           />
           <MetricCard
             title="Completion Rate"
@@ -150,8 +157,8 @@ export default function AdminDashboard() {
               ? `${Math.round((content.gigs.completed / content.gigs.total) * 100)}%`
               : '0%'}
             icon="📊"
-            color="bg-purple-50"
-            textColor="text-purple-700"
+            color="bg-gray-50"
+            textColor="text-gray-700"
           />
         </div>
       </div>

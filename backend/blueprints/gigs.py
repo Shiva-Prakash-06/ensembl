@@ -153,7 +153,7 @@ def accept_application(application_id):
     """
     Venue accepts an ensemble's application
     1. Update status to 'accepted'
-    2. Close the gig
+    2. Close the gig (is_open=False) and set gig status to 'accepted'
     3. Auto-create a chat message from Venue -> Ensemble Leader
     4. Return Leader ID for redirect
     """
@@ -161,12 +161,13 @@ def accept_application(application_id):
     if not application:
         return jsonify({'error': 'Application not found'}), 404
     
-    # 1. Update Status
+    # 1. Update Application Status
     application.status = 'accepted'
     
-    # 2. Close the gig
+    # 2. Close the gig and update gig status (Phase 5)
     gig = application.gig
     gig.is_open = False
+    gig.status = 'accepted'  # Phase 5: Gig moves to 'accepted' status
 
     # 3. Create Initial Chat Message (Venue Owner -> Ensemble Leader)
     venue_owner_id = gig.venue.user_id
@@ -188,6 +189,38 @@ def accept_application(application_id):
         'message': 'Application accepted! Chat opened.',
         'application': application.to_dict(),
         'chat_with_id': ensemble_leader_id # <--- Return this for the frontend
+    }), 200
+
+
+@gigs_bp.route('/<int:gig_id>/mark-completed', methods=['PUT'])
+def mark_gig_completed(gig_id):
+    """
+    Phase 5: Venue marks gig as completed after the event
+    Only available after gig date has passed
+    Changes status from 'accepted' -> 'completed'
+    This unlocks the handshake confirmation flow
+    """
+    gig = Gig.query.get(gig_id)
+    if not gig:
+        return jsonify({'error': 'Gig not found'}), 404
+    
+    # Verify gig date has passed
+    if gig.date_time > datetime.utcnow():
+        return jsonify({'error': 'Cannot mark as completed before gig date'}), 400
+    
+    # Verify gig is in 'accepted' status (has a chosen ensemble)
+    if gig.status != 'accepted':
+        return jsonify({'error': 'Can only mark accepted gigs as completed'}), 400
+    
+    # Mark as completed
+    gig.status = 'completed'
+    gig.completed_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Gig marked as completed',
+        'gig': gig.to_dict()
     }), 200
 
 

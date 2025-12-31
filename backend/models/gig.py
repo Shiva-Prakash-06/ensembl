@@ -25,6 +25,11 @@ class Gig(db.Model):
     # Status
     is_open = db.Column(db.Boolean, default=True)  # Whether still accepting applications
     
+    # Phase 5: Gig Workflow Status
+    # open -> accepted -> completed
+    status = db.Column(db.String(20), default='open')  # open, accepted, completed
+    completed_at = db.Column(db.DateTime, nullable=True)  # When venue marked as completed
+    
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -46,6 +51,8 @@ class Gig(db.Model):
             'payment_description': self.payment_description,
             'description': self.description,
             'is_open': self.is_open,
+            'status': self.status,  # Phase 5: Include workflow status
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
             'created_at': self.created_at.isoformat()
         }
     

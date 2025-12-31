@@ -109,6 +109,10 @@ export default function Navigation() {
                   Ensembles
                   <IndicatorDot show={hasPendingInvites} />
                 </Link>
+                <Link to="/analytics/musician" className="text-gray-700 hover:text-indigo-600 transition font-medium">
+                  Analytics
+                  {user?.is_pro && <span className="ml-1 text-xs">✨</span>}
+                </Link>
                 <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition font-medium relative">
                   Chat
                   <NotificationBadge count={unreadCount} />
@@ -119,6 +123,10 @@ export default function Navigation() {
               <>
                 <Link to="/venue-dashboard" className="text-gray-700 hover:text-indigo-600 transition font-medium">
                   My Gigs
+                </Link>
+                <Link to="/analytics/venue" className="text-gray-700 hover:text-indigo-600 transition font-medium">
+                  Analytics
+                  {user?.is_pro && <span className="ml-1 text-xs">✨</span>}
                 </Link>
                 <Link to="/chat" className="text-gray-700 hover:text-indigo-600 transition font-medium relative">
                   Messages

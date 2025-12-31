@@ -37,6 +37,10 @@ class User(db.Model):
     # Availability toggle
     is_active = db.Column(db.Boolean, default=True)  # "Open to Jam" vs "Not Active"
     
+    # Phase 5: Pro Subscription (Admin-controlled only, no payments)
+    # TODO: In production, integrate with payment provider
+    is_pro = db.Column(db.Boolean, default=False)  # Pro analytics access
+    
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -56,6 +60,7 @@ class User(db.Model):
             'name': self.name,
             'role': self.role,
             'city': self.city,
+            'is_pro': self.is_pro,  # Phase 5: Include Pro status
             'created_at': self.created_at.isoformat()
         }
         

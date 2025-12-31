@@ -93,6 +93,14 @@ class AdminAPI {
     return this.handleResponse(response)
   }
 
+  async toggleUserPro(userId) {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/toggle-pro`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+    })
+    return this.handleResponse(response)
+  }
+
   // ===== VENUES =====
 
   async getVenues(page = 1) {

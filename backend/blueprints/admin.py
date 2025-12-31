@@ -60,13 +60,14 @@ def get_analytics(admin_user):
     active_ensembles = Ensemble.query.count()
     total_venues = Venue.query.count()
     total_gigs = Gig.query.count()
-    open_gigs = Gig.query.filter_by(is_open=True).count()
     
-    # Verified gigs (completed)
-    from models.gig import GigApplication
-    completed_gigs = GigApplication.query.filter(
-        GigApplication.confirmed_at.isnot(None)
-    ).count()
+    # Phase 5: Use status field for accurate counts
+    # Status: 'open' = posted but no ensemble accepted yet
+    #         'accepted' = ensemble accepted, gig booked but not yet completed
+    #         'completed' = gig happened and marked as completed by venue
+    open_gigs = Gig.query.filter_by(status='open').count()
+    accepted_gigs = Gig.query.filter_by(status='accepted').count()
+    completed_gigs = Gig.query.filter_by(status='completed').count()
     
     return jsonify({
         'users': {
@@ -82,6 +83,7 @@ def get_analytics(admin_user):
             'gigs': {
                 'total': total_gigs,
                 'open': open_gigs,
+                'accepted': accepted_gigs,
                 'completed': completed_gigs
             }
         }
@@ -131,6 +133,7 @@ def get_users(admin_user):
             'city': user.city,
             'instrument': user.instrument if user.role == 'musician' else None,
             'is_active': user.is_active,
+            'is_pro': user.is_pro,  # Phase 5: Include Pro status
             'created_at': user.created_at.isoformat()
         })
     
@@ -173,6 +176,7 @@ def get_user_detail(admin_user, user_id):
         'city': user.city,
         'instrument': user.instrument if user.role == 'musician' else None,
         'is_active': user.is_active,
+        'is_pro': user.is_pro,  # Phase 5: Include Pro status
         'created_at': user.created_at.isoformat(),
         'stats': {
             'ensembles': ensemble_count,
@@ -201,6 +205,30 @@ def toggle_user_active(admin_user, user_id):
         'message': f"User {'enabled' if user.is_active else 'disabled'}",
         'user_id': user.id,
         'is_active': user.is_active
+    }), 200
+
+
+@admin_bp.route('/users/<int:user_id>/toggle-pro', methods=['POST'])
+@admin_required
+def toggle_user_pro(admin_user, user_id):
+    """
+    Phase 5: Toggle Pro subscription status for a user
+    In this MVP, Pro is admin-controlled (no payments)
+    TODO: In production, integrate with payment provider
+    """
+    user = User.query.get(user_id)
+    
+    if not user or user.role == 'admin':
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Toggle Pro status
+    user.is_pro = not user.is_pro
+    db.session.commit()
+    
+    return jsonify({
+        'message': f"User Pro status {'enabled' if user.is_pro else 'disabled'}",
+        'user_id': user.id,
+        'is_pro': user.is_pro
     }), 200
 
 

@@ -163,6 +163,17 @@ export default function VenueDashboard() {
     }
   }
 
+  const handleMarkCompleted = async (gigId) => {
+    try {
+      await api.markGigCompleted(gigId)
+      showBanner('success', 'Gig marked as completed! The handshake flow is now unlocked.')
+      loadData() // Reload to update status
+    } catch (error) {
+      console.error('Failed to mark gig as completed:', error)
+      showBanner('error', error.message)
+    }
+  }
+
   const toggleGigApplications = (gigId) => {
     setExpandedGig(expandedGig === gigId ? null : gigId)
   }
@@ -413,13 +424,28 @@ export default function VenueDashboard() {
                         {new Date(gig.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      gig.is_open 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {gig.is_open ? 'Open' : 'Closed'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        gig.status === 'completed' 
+                          ? 'bg-purple-100 text-purple-700'
+                          : gig.status === 'accepted'
+                          ? 'bg-blue-100 text-blue-700'
+                          : gig.is_open 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {gig.status === 'completed' ? 'Completed' : gig.status === 'accepted' ? 'Booked' : gig.is_open ? 'Open' : 'Apps Closed'}
+                      </span>
+                      {/* Mark as Completed button - only show for accepted gigs after the gig date */}
+                      {gig.status === 'accepted' && new Date(gig.date_time) < new Date() && (
+                        <button
+                          onClick={() => handleMarkCompleted(gig.id)}
+                          className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+                        >
+                          Mark as Completed
+                        </button>
+                      )}
+                    </div>
                   </div>
                   
                   <p className="text-gray-700 mb-3">{gig.description}</p>

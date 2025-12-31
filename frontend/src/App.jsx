@@ -16,6 +16,8 @@ import Ensembles from './pages/Ensembles'
 import Gigs from './pages/Gigs'
 import VenueProfile from './pages/VenueProfile'
 import VenueDashboard from './pages/VenueDashboard'
+import MusicianAnalytics from './pages/MusicianAnalytics'
+import VenueAnalytics from './pages/VenueAnalytics'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminUsers from './pages/AdminUsers'
@@ -53,6 +55,8 @@ function App() {
               <Route path="/gigs" element={<Gigs />} />
               <Route path="/venues/:venueId" element={<VenueProfile />} />
               <Route path="/venue-dashboard" element={<VenueDashboard />} />
+              <Route path="/analytics/musician" element={<MusicianAnalytics />} />
+              <Route path="/analytics/venue" element={<VenueAnalytics />} />
             </Route>
           </Route>
         </Routes>
