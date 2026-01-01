@@ -17,12 +17,13 @@ export default function Ensembles() {
   // Form State
   const [newEnsemble, setNewEnsemble] = useState({
     name: '',
+    description: '', // Added description field
     member_ids: [],
   })
 
   // Alert/Confirmation State
   const [alertState, setAlertState] = useState({ isOpen: false, message: '', type: 'success' });
-  const [pendingRemoval, setPendingRemoval] = useState(null); // Stores { ensembleId, userId, isSelf }
+  const [pendingRemoval, setPendingRemoval] = useState(null);
 
   useEffect(() => {
     loadEnsembles()
@@ -47,14 +48,13 @@ export default function Ensembles() {
         leader_id: user.id,
       })
       setIsCreating(false)
-      setNewEnsemble({ name: '', member_ids: [] })
+      setNewEnsemble({ name: '', description: '', member_ids: [] }) // Reset description too
       loadEnsembles()
     } catch (error) {
       console.error('Failed to create ensemble:', error)
     }
   }
 
-  // 1. Trigger Confirmation Modal
   const confirmRemoveMember = (ensembleId, memberId, isSelf = false) => {
       setPendingRemoval({ ensembleId, memberId, isSelf });
       setAlertState({
@@ -66,14 +66,9 @@ export default function Ensembles() {
       });
   };
 
-  // 2. Execute Removal
-  // ... existing code ...
-
-  // 2. Execute Removal
   const handleAlertClose = async () => {
       if (alertState.type === 'warning' && pendingRemoval) {
           try {
-              // UPDATED LINE: Pass user.id as the 3rd argument (requesterId)
               await api.removeMember(pendingRemoval.ensembleId, pendingRemoval.memberId, user.id);
               
               setAlertState({
@@ -98,8 +93,6 @@ export default function Ensembles() {
           setAlertState({ ...alertState, isOpen: false });
       }
   };
-
-  // ... rest of the file ...
 
   if (loading) {
     return <div className="text-center py-12">Loading...</div>
@@ -138,6 +131,21 @@ export default function Ensembles() {
                 placeholder="e.g., The Jazz Cats"
               />
             </div>
+            
+            {/* NEW: Description Field */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                rows="3"
+                value={newEnsemble.description}
+                onChange={(e) => setNewEnsemble({ ...newEnsemble, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Describe your ensemble's style, goals, or vibe..."
+              />
+            </div>
+
             <div className="flex gap-3">
               <button
                 type="button"
@@ -188,7 +196,6 @@ export default function Ensembles() {
                   </div>
                 </div>
                 
-                {/* Verified Gig Count Badge */}
                 <div className="bg-indigo-50 rounded-lg px-4 py-2 text-center">
                   <div className="text-2xl font-bold text-indigo-600">
                     {ensemble.verified_gig_count || 0}
@@ -199,10 +206,12 @@ export default function Ensembles() {
                 </div>
               </div>
 
-              {/* Combined Bio */}
-              {ensemble.combined_bio && (
+              {/* Combined Bio / Description Display */}
+              {(ensemble.description || ensemble.combined_bio) && (
                 <div className="mb-4 pb-4 border-b border-gray-200">
-                  <p className="text-sm text-gray-700 line-clamp-2">{ensemble.combined_bio}</p>
+                  <p className="text-sm text-gray-700 line-clamp-2">
+                    {ensemble.description || ensemble.combined_bio}
+                  </p>
                 </div>
               )}
 
@@ -212,7 +221,6 @@ export default function Ensembles() {
                   <h4 className="text-sm font-semibold text-gray-700">
                     Members ({ensemble.members?.length || 0})
                   </h4>
-                  {/* Leave Button (If I am NOT the leader) */}
                   {ensemble.leader_id !== user.id && (
                     <button 
                       onClick={() => confirmRemoveMember(ensemble.id, user.id, true)}
@@ -237,7 +245,6 @@ export default function Ensembles() {
                         </div>
                       </div>
 
-                      {/* Remove Button: Only show if I am Leader AND removing someone else */}
                       {ensemble.leader_id === user.id && member.id !== user.id && (
                         <button 
                           onClick={() => confirmRemoveMember(ensemble.id, member.id)}
@@ -274,18 +281,12 @@ export default function Ensembles() {
       )}
 
       {/* Confirmation/Alert Modal */}
-     {/* ... (rest of the file above remains the same) ... */}
-
-      {/* Confirmation/Alert Modal */}
       <AlertModal 
         isOpen={alertState.isOpen}
-        // This is the "Confirm/OK" action
         onClose={handleAlertClose}
-        // This is the "Cancel" action (Just close modal, do nothing else)
         onCancel={() => setAlertState({ ...alertState, isOpen: false })}
         message={alertState.message}
         type={alertState.type}
-        // Only show Cancel button if it's a warning (question)
         showCancel={alertState.type === 'warning'}
       />
     </div>

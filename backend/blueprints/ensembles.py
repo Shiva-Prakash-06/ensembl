@@ -11,19 +11,24 @@ from models.message import Message
 
 ensembles_bp = Blueprint('ensembles', __name__)
 
-# ... (Previous create, get, invite routes remain the same) ...
-# ... (COPY THE PREVIOUS ROUTES HERE IF NEEDED, OR JUST UPDATE THE REMOVE_INVITE FUNCTION BELOW) ...
-
 @ensembles_bp.route('/', methods=['POST'])
 def create_ensemble():
     data = request.json
     required = ['name', 'leader_id']
     if not all(field in data for field in required):
         return jsonify({'error': 'Missing required fields'}), 400
+    
     leader = User.query.get(data['leader_id'])
     if not leader:
         return jsonify({'error': 'Leader not found'}), 404
-    ensemble = Ensemble(name=data['name'], leader_id=data['leader_id'])
+    
+    # Updated: Added description field
+    ensemble = Ensemble(
+        name=data['name'], 
+        leader_id=data['leader_id'],
+        description=data.get('description') 
+    )
+    
     ensemble.members.append(leader)
     db.session.add(ensemble)
     db.session.commit()
@@ -97,7 +102,6 @@ def accept_invite(ensemble_id):
 
     return jsonify({'error': 'No invite found'}), 400
 
-# --- UPDATED FUNCTION ---
 @ensembles_bp.route('/<int:ensemble_id>/invites/<int:user_id>', methods=['DELETE'])
 def remove_invite(ensemble_id, user_id):
     """
@@ -141,7 +145,6 @@ def remove_invite(ensemble_id, user_id):
         
     db.session.commit()
     return jsonify({'message': 'Invite declined'}), 200
-# ------------------------
 
 @ensembles_bp.route('/<int:ensemble_id>/members/<int:user_id>', methods=['DELETE'])
 def remove_member(ensemble_id, user_id):
