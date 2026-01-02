@@ -1,7 +1,6 @@
 /**
  * Navigation Component
- * 
- * Phase 3: Enhanced with visual state indicators
+ * * Phase 3: Enhanced with visual state indicators
  * Shows badges for:
  * - Unread messages
  * - Pending ensemble invites
@@ -25,12 +24,15 @@ export default function Navigation() {
 
   // Fetch indicator states whenever the user navigates
   useEffect(() => {
-    if (user) {
+    // SAFETY GUARD: Only fetch if user exists and has an ID
+    if (user?.id) {
       fetchIndicators()
     }
   }, [user, location.pathname])
 
   const fetchIndicators = async () => {
+    if (!user?.id) return; // Double check inside function
+
     try {
       // 1. Unread message count
       const unreadData = await api.getUnreadCount(user.id)
@@ -42,6 +44,9 @@ export default function Navigation() {
         let hasPending = false
         
         for (const conv of conversations.conversations || []) {
+          // Safety check for conversation partner
+          if (!conv.other_user?.id) continue;
+
           const messages = await api.getMessages(user.id, conv.other_user.id)
           const pendingInvites = messages.messages?.filter(
             msg => msg.msg_type === 'invite' && 

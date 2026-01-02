@@ -51,7 +51,7 @@ class Gig(db.Model):
             'payment_description': self.payment_description,
             'description': self.description,
             'is_open': self.is_open,
-            'status': self.status,  # Phase 5: Include workflow status
+            'status': self.status,
             'completed_at': self.completed_at.isoformat() if self.completed_at else None,
             'created_at': self.created_at.isoformat()
         }
@@ -71,12 +71,15 @@ class GigApplication(db.Model):
     gig_id = db.Column(db.Integer, db.ForeignKey('gigs.id'), nullable=False)
     ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
     
-    # Application status
-    status = db.Column(db.String(20), default='pending')  # pending, accepted, rejected
+    # Status: pending, accepted, rejected
+    status = db.Column(db.String(20), default='pending')
+    
+    # Has the musician seen the final result and dismissed the notification?
+    musician_acknowledged = db.Column(db.Boolean, default=False)
     
     # Post-gig confirmation - both parties must confirm
-    gig_happened_venue = db.Column(db.Boolean, nullable=True)  # Venue's confirmation
-    gig_happened_ensemble = db.Column(db.Boolean, nullable=True)  # Ensemble leader's confirmation
+    gig_happened_venue = db.Column(db.Boolean, nullable=True)
+    gig_happened_ensemble = db.Column(db.Boolean, nullable=True)
     confirmed_at = db.Column(db.DateTime, nullable=True)
     
     # Metadata
@@ -91,8 +94,10 @@ class GigApplication(db.Model):
         return {
             'id': self.id,
             'gig_id': self.gig_id,
-            'ensemble': self.ensemble.to_dict(),
+            'ensemble_id': self.ensemble_id,
+            'ensemble': self.ensemble.to_dict(), # <--- I ADDED THIS LINE BACK
             'status': self.status,
+            'musician_acknowledged': self.musician_acknowledged,
             'gig_happened_venue': self.gig_happened_venue,
             'gig_happened_ensemble': self.gig_happened_ensemble,
             'applied_at': self.applied_at.isoformat()

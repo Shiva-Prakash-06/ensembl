@@ -1,8 +1,8 @@
 /**
  * Gigs Page
  * Browse and apply to gigs
- * 
  * Phase 2: Enhanced with better microcopy and ensemble credibility display
+ * Phase 5 Update: Enhanced button states and status visibility
  */
 
 import { useState, useEffect } from 'react'
@@ -18,6 +18,9 @@ export default function Gigs() {
   const [loading, setLoading] = useState(true)
   const [selectedEnsemble, setSelectedEnsemble] = useState(null)
   const [selectedEnsembleData, setSelectedEnsembleData] = useState(null)
+  
+  // Local state to hide gigs immediately after clicking X
+  const [dismissedGigs, setDismissedGigs] = useState([])
 
   useEffect(() => {
     loadData()
@@ -67,9 +70,34 @@ export default function Gigs() {
     }
   }
 
+  const handleDismiss = async (gigId) => {
+    // 1. Optimistically hide it
+    setDismissedGigs(prev => [...prev, gigId]);
+
+    // 2. Call Backend to save preference
+    try {
+      const token = localStorage.getItem('token');
+      // Note: Assuming API base URL. If your api service handles base URL, this is a raw fetch.
+      // Ideally this should be in api.js as dismissGig(gigId)
+      await fetch(`http://localhost:5000/api/gigs/${gigId}/dismiss`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': user.id,
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.error("Failed to dismiss gig", error);
+    }
+  }
+
   if (loading) {
     return <div className="text-center py-12">Loading...</div>
   }
+
+  // Filter out locally dismissed gigs
+  const visibleGigs = gigs.filter(g => !dismissedGigs.includes(g.id));
 
   return (
     <div>
@@ -148,7 +176,7 @@ export default function Gigs() {
       )}
 
       {/* Gigs List */}
-      {gigs.length === 0 ? (
+      {visibleGigs.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center animate-fade-in">
           <div className="text-gray-400 text-5xl mb-4">🎤</div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No gigs on the board yet</h3>
@@ -158,10 +186,22 @@ export default function Gigs() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {gigs.map((gig) => (
-            <div key={gig.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6 card-hover-lift transition animate-fade-in">
+          {visibleGigs.map((gig) => (
+            <div key={gig.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6 card-hover-lift transition animate-fade-in relative group">
+              
+              {/* Dismiss Button (Only for Accepted/Declined gigs) */}
+              {(gig.my_status === 'rejected' || gig.my_status === 'accepted') && (
+                <button
+                    onClick={() => handleDismiss(gig.id)}
+                    className="absolute top-2 right-2 text-gray-300 hover:text-gray-500 p-2"
+                    title="Remove from board"
+                >
+                    ✕
+                </button>
+              )}
+
               <div className="mb-4">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-2 pr-6">
                   <h3 className="text-xl font-bold text-gray-900">{gig.title}</h3>
                   <span className={`px-2 py-1 rounded text-xs font-semibold ${
                     gig.status === 'completed'
@@ -197,7 +237,23 @@ export default function Gigs() {
 
               <p className="text-gray-700 mb-4 line-clamp-3">{gig.description}</p>
 
-              {gig.is_open ? (
+              {/* Dynamic Button Status */}
+              {gig.my_status === 'pending' ? (
+                <button
+                  disabled
+                  className="w-full bg-white border-2 border-gray-300 text-gray-500 py-3 rounded-lg font-medium cursor-not-allowed"
+                >
+                  ⏳ Applied (Pending Review)
+                </button>
+              ) : gig.my_status === 'accepted' ? (
+                <div className="w-full bg-green-50 border border-green-200 text-green-700 py-3 rounded-lg font-bold text-center">
+                  🎉 Application Accepted!
+                </div>
+              ) : gig.my_status === 'rejected' ? (
+                <div className="w-full bg-red-50 border border-red-200 text-red-700 py-3 rounded-lg font-bold text-center">
+                  ✕ Application Declined
+                </div>
+              ) : gig.is_open ? (
                 <button
                   onClick={() => handleApply(gig.id)}
                   disabled={!selectedEnsemble || ensembles.length === 0}

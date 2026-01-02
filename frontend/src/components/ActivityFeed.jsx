@@ -1,16 +1,13 @@
 /**
  * Activity Feed Component
- * 
- * Phase 3: Awareness, Feedback & Emotional UX
+ * * Phase 3: Awareness, Feedback & Emotional UX
  * Displays recent activity derived from existing data
- * 
- * Activity types:
+ * * Activity types:
  * - Unread messages
  * - Ensemble invites (pending/accepted/declined)
  * - Gig applications (accepted/rejected)
  * - Gig confirmations
- * 
- * No backend changes - uses existing API data
+ * * No backend changes - uses existing API data
  */
 
 import { useState, useEffect } from 'react'
@@ -23,12 +20,15 @@ export default function ActivityFeed({ maxItems = 10 }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // SAFETY GUARD: Only load if user ID exists
     if (user?.id) {
       loadActivities()
     }
   }, [user?.id])
 
   const loadActivities = async () => {
+    if (!user?.id) return; 
+
     try {
       const activityItems = []
 
@@ -57,6 +57,9 @@ export default function ActivityFeed({ maxItems = 10 }) {
         const inviteMessages = []
         
         for (const conv of conversations.conversations || []) {
+          // Safety check
+          if (!conv.other_user?.id) continue;
+
           const messages = await api.getMessages(user.id, conv.other_user.id)
           const pendingInvites = messages.messages?.filter(
             msg => msg.msg_type === 'invite' && 
@@ -87,9 +90,8 @@ export default function ActivityFeed({ maxItems = 10 }) {
         try {
           const ensemblesData = await api.getUserEnsembles(user.id)
           for (const ensemble of ensemblesData.ensembles || []) {
-            // Note: We don't have a direct "get my applications" endpoint
-            // This is a limitation - we'd show this after they check gigs
-            // For now, we can add a placeholder or skip
+            // Note: We don't have a direct "get my applications" endpoint yet
+            // This is a placeholder for future activity
           }
         } catch (error) {
           console.error('Failed to load ensemble applications:', error)

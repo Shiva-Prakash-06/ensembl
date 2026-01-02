@@ -1,10 +1,8 @@
 /**
  * Ensemble Application Card Component
- * 
- * Phase 2: Venue Confidence & Booking Readiness
+ * * Phase 2: Venue Confidence & Booking Readiness
  * Displays ensemble application with credibility signals for quick venue decision-making
- * 
- * Shows:
+ * * Shows:
  * - Ensemble name and member count
  * - Instruments represented
  * - Verified gig count (trust signal)
@@ -17,6 +15,12 @@ import { useState } from 'react'
 
 export default function EnsembleApplicationCard({ application, onAccept, onReject }) {
   const [loading, setLoading] = useState(false)
+
+  // --- SAFETY CHECK: Prevent crash if data is missing ---
+  if (!application || !application.ensemble) {
+      return null;
+  }
+
   const ensemble = application.ensemble
 
   const handleAccept = async () => {
@@ -37,7 +41,7 @@ export default function EnsembleApplicationCard({ application, onAccept, onRejec
     }
   }
 
-  // Extract instruments from members
+  // Extract instruments from members (Safely)
   const instruments = ensemble.members
     ? [...new Set(ensemble.members.map(m => m.instrument).filter(Boolean))]
     : []
@@ -106,7 +110,7 @@ export default function EnsembleApplicationCard({ application, onAccept, onRejec
         </div>
       )}
 
-      {/* Member List */}
+      {/* Member List (Safely Rendered) */}
       {ensemble.members && ensemble.members.length > 0 && (
         <div className="mb-4 border-t border-gray-200 pt-4">
           <p className="text-sm font-medium text-gray-700 mb-2">Band Members:</p>
@@ -151,13 +155,14 @@ export default function EnsembleApplicationCard({ application, onAccept, onRejec
         </div>
       )}
 
-      {/* Status Badge for Accepted/Rejected */}
+      {/* Status Badge for Accepted */}
       {application.status === 'accepted' && (
         <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-center">
           <span className="text-green-700 font-medium">✓ Accepted</span>
         </div>
       )}
 
+      {/* Status Badge for Rejected */}
       {application.status === 'rejected' && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-center">
           <span className="text-gray-600 font-medium">Declined</span>

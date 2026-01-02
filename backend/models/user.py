@@ -6,7 +6,6 @@ Represents musicians on the platform
 from database import db
 from datetime import datetime
 
-
 class User(db.Model):
     """
     Core user/musician profile
@@ -38,7 +37,6 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)  # "Open to Jam" vs "Not Active"
     
     # Phase 5: Pro Subscription (Admin-controlled only, no payments)
-    # TODO: In production, integrate with payment provider
     is_pro = db.Column(db.Boolean, default=False)  # Pro analytics access
     
     # Metadata
@@ -64,18 +62,39 @@ class User(db.Model):
             'created_at': self.created_at.isoformat()
         }
         
-        # Add musician-specific fields only if role is musician
+        # FIX: Ensure keys ALWAYS exist (set to None by default)
+        # This prevents 'undefined' errors on the frontend
+        base_dict['musician_profile'] = None
+        base_dict['venue_profile'] = None
+        
         if self.role == 'musician':
-            base_dict.update({
+            # Synthesize musician_profile from the user object itself
+            base_dict['musician_profile'] = {
+                'id': self.id, # Profile ID is same as User ID
                 'instrument': self.instrument,
                 'photo_url': self.photo_url,
                 'media_embed': self.media_embed,
                 'bio': self.bio,
                 'vibe_tags': self.vibe_tags.split(',') if self.vibe_tags else [],
                 'is_active': self.is_active,
-            })
+            }
+            # Flattened fields also available at root
+            base_dict.update(base_dict['musician_profile'])
+
+        elif self.role == 'venue':
+            # Dynamically import Venue to avoid circular import
+            from models.venue import Venue
+            venue = Venue.query.filter_by(user_id=self.id).first()
+            
+            if venue:
+                base_dict['venue_profile'] = {
+                    'id': venue.id,
+                    'name': venue.name,
+                    'location': venue.location,
+                    'verified_gig_count': venue.verified_gig_count
+                }
         
         return base_dict
     
     def __repr__(self):
-        return f'<User {self.name} ({self.instrument})>'
+        return f'<User {self.name} ({self.role})>'
