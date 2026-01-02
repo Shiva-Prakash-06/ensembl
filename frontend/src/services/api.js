@@ -7,13 +7,20 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 /**
  * Generic API request helper
+ * Always includes credentials and user ID for authentication
  */
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
   
+  // Get user from localStorage for authentication
+  const storedUser = localStorage.getItem('ensembl_user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+  
   const config = {
+    credentials: 'include', // Always send cookies for authentication
     headers: {
       'Content-Type': 'application/json',
+      ...(user?.id && { 'X-User-Id': user.id.toString() }), // Add user ID header if logged in
       ...options.headers,
     },
     ...options,
@@ -101,6 +108,7 @@ export const api = {
 
   // Gigs
   getGigs: (params = {}) => apiRequest(`/gigs/?${new URLSearchParams(params)}`),
+  getMyGigs: () => apiRequest('/gigs/my-gigs'),
   createGig: (data) => apiRequest('/gigs/', { method: 'POST', body: JSON.stringify(data) }),
   applyToGig: (gigId, data) => apiRequest(`/gigs/${gigId}/apply`, { method: 'POST', body: JSON.stringify(data) }),
   getGigApplications: (gigId) => apiRequest(`/gigs/${gigId}/applications`),
@@ -108,6 +116,9 @@ export const api = {
   rejectApplication: (appId) => apiRequest(`/gigs/applications/${appId}/reject`, { method: 'PUT' }),
   confirmGig: (appId, data) => apiRequest(`/gigs/applications/${appId}/confirm`, { method: 'PUT', body: JSON.stringify(data) }),
   markGigCompleted: (gigId) => apiRequest(`/gigs/${gigId}/mark-completed`, { method: 'PUT' }),
+  markEnsembleCompleted: (appId) => apiRequest(`/gigs/applications/${appId}/mark-ensemble-completed`, { method: 'PUT' }),
+  getVenueGigHistory: (venueId) => apiRequest(`/gigs/history/venue/${venueId}`),
+  getEnsembleGigHistory: (ensembleId) => apiRequest(`/gigs/history/ensemble/${ensembleId}`),
   
   // Venues
   getVenues: () => apiRequest('/venues/'),
@@ -115,6 +126,10 @@ export const api = {
   getVenue: (venueId) => apiRequest(`/venues/${venueId}`),
   getVenueByUser: (userId) => apiRequest(`/venues/user/${userId}`),
   updateVenue: (venueId, data) => apiRequest(`/venues/${venueId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  
+  // History (Phase 2 Fix: Verified Gig History - Source of Truth)
+  getMusicianHistory: () => apiRequest('/history/musician'),
+  getVenueHistory: () => apiRequest('/history/venue'),
 }
 
 export default api

@@ -22,7 +22,10 @@ export default function MusicianAnalytics() {
   const fetchAnalytics = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/musician', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'X-User-Id': user.id.toString()
+        }
       });
 
       if (!response.ok) {

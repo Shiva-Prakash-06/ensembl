@@ -7,11 +7,13 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
+import GigHistory from '../components/GigHistory'
 
 export default function Profile() {
   const { userId } = useParams()
   const { user: currentUser, updateUser } = useAuth()
   const [profile, setProfile] = useState(null)
+  const [ensembles, setEnsembles] = useState([])
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({})
   const [loading, setLoading] = useState(true)
@@ -20,6 +22,9 @@ export default function Profile() {
 
   useEffect(() => {
     loadProfile()
+    if (isOwnProfile) {
+      loadEnsembles()
+    }
   }, [userId])
 
   const loadProfile = async () => {
@@ -36,6 +41,15 @@ export default function Profile() {
       console.error('Failed to load profile:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadEnsembles = async () => {
+    try {
+      const ensemblesData = await api.getUserEnsembles(userId)
+      setEnsembles(ensemblesData.ensembles || [])
+    } catch (error) {
+      console.error('Failed to load ensembles:', error)
     }
   }
 
@@ -199,7 +213,33 @@ export default function Profile() {
             Save Changes
           </button>
         )}
+
+        {/* Ensembles */}
+        {profile.role === 'musician' && isOwnProfile && ensembles.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h3 className="text-lg font-semibold mb-3">Ensembles</h3>
+            <div className="space-y-2">
+              {ensembles.map((ens) => (
+                <div key={ens.id} className="bg-indigo-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-indigo-900">{ens.name}</span>
+                    <span className="text-sm text-indigo-600">
+                      {ens.members?.length || 0} members
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Gig History - Phase 2 Fix: Real data from /api/history */}
+      {profile?.role === 'musician' && isOwnProfile && (
+        <div className="mt-6">
+          <GigHistory />
+        </div>
+      )}
     </div>
   )
 }

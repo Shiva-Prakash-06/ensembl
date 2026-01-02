@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
 import EnsembleApplicationCard from '../components/EnsembleApplicationCard'
 import ActivityFeed from '../components/ActivityFeed'
+import GigHistory from '../components/GigHistory'
 import { useFeedbackBanner } from '../components/FeedbackBanner'
 
 export default function VenueDashboard() {
@@ -58,9 +59,13 @@ export default function VenueDashboard() {
       const venueData = await api.getVenueByUser(user.id)
       setVenue(venueData)
       
-      // Load gigs for this venue
-      const gigsData = await api.getGigs()
-      const myGigs = gigsData.gigs.filter(g => g.venue.id === venueData.id)
+      // Load ALL gigs for this venue (including closed/accepted/completed)
+      const [openGigsData, closedGigsData] = await Promise.all([
+        api.getGigs({ is_open: 'true' }),
+        api.getGigs({ is_open: 'false' })
+      ])
+      const allGigs = [...openGigsData.gigs, ...closedGigsData.gigs]
+      const myGigs = allGigs.filter(g => g.venue.id === venueData.id)
       setGigs(myGigs)
 
       // Load applications for each gig
@@ -294,15 +299,7 @@ export default function VenueDashboard() {
               <h1 className="text-3xl font-bold text-gray-900">{venue.name}</h1>
               <p className="text-gray-600 mt-1">{venue.location}</p>
               
-              {/* Venue Credibility Signal */}
-              <div className="mt-3 inline-flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-lg">
-                <span className="text-2xl font-bold text-indigo-600">
-                  {venue.verified_gig_count || 0}
-                </span>
-                <span className="text-sm font-medium text-indigo-700">
-                  Verified Gigs Hosted
-                </span>
-              </div>
+              {/* Note: Verified gig count is now shown in GigHistory component */}
             </div>
             <button
               onClick={() => setIsCreatingGig(true)}
@@ -578,9 +575,10 @@ export default function VenueDashboard() {
       )}
         </div>
 
-        {/* Sidebar - Activity Feed */}
-        <div className="lg:col-span-1">
+        {/* Sidebar - Activity Feed & Gig History */}
+        <div className="lg:col-span-1 space-y-6">
           <ActivityFeed />
+          <GigHistory />
         </div>
       </div>
     </div>

@@ -32,6 +32,9 @@ class Ensemble(db.Model):
     name = db.Column(db.String(100), nullable=False)
     leader_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Who created it
     
+    # Description field for ensemble (added for better UX)
+    description = db.Column(db.Text, nullable=True)
+    
     # Auto-generated profile (combined from members)
     combined_bio = db.Column(db.Text, nullable=True)
     combined_media = db.Column(db.Text, nullable=True)  # JSON list of member media links
@@ -59,6 +62,7 @@ class Ensemble(db.Model):
             'id': self.id,
             'name': self.name,
             'leader_id': self.leader_id,
+            'description': self.description,
             'members': [
                 {
                     'id': member.id,

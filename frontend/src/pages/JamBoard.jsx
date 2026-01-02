@@ -10,6 +10,8 @@ import api from '../services/api'
 import JamPostCard from '../components/JamPostCard'
 import CreateJamPostModal from '../components/CreateJamPostModal'
 import ActivityFeed from '../components/ActivityFeed'
+import MyGigs from '../components/MyGigs'
+import GigHistory from '../components/GigHistory'
 
 export default function JamBoard() {
   const [posts, setPosts] = useState([])
@@ -117,8 +119,14 @@ export default function JamBoard() {
         )}
       </div>
 
-      {/* Sidebar - Activity Feed */}
-      <div className="lg:col-span-1">
+      {/* Sidebar - Activity Feed, My Gigs, Gig History */}
+      <div className="lg:col-span-1 space-y-6">
+        {user?.role === 'musician' && (
+          <>
+            <MyGigs />
+            <GigHistory />
+          </>
+        )}
         <ActivityFeed />
       </div>
 

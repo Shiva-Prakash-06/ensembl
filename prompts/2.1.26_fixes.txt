@@ -1,0 +1,81 @@
+You are helping me fix Phase 2 issues in the Ensembl MVP.
+The UI is already built and must NOT be redesigned.
+All fixes must stay within the frozen MVP scope.
+
+Current Problems to Fix:
+1. Analytics pages fail with 401 errors and undefined property access
+2. Accepted gigs disappear with no lifecycle or completion state
+3. “Verified gigs completed” is shown as plain text with no history or source
+
+STRICT SCOPE RULES:
+- Do NOT add payments
+- Do NOT add ratings
+- Do NOT add notifications
+- Do NOT add AI
+- Do NOT redesign UI
+- Only fix state, persistence, and visibility
+
+---
+
+## REQUIRED FIXES
+
+### 1. Analytics Endpoints (Role-Safe)
+Backend:
+- Create role-specific endpoints:
+  - /api/analytics/musician
+  - /api/analytics/venue
+- Validate user is logged in
+- Validate correct role
+- Always return structured JSON:
+  { "activities": [] }
+- Never return undefined or null
+
+Frontend:
+- Add defensive checks in ActivityFeed.jsx
+- Do not assume nested objects exist
+- Gracefully handle empty states
+
+---
+
+### 2. Gig Lifecycle Completion
+Backend:
+- Add status field to Gig or GigApplication:
+  "open" | "accepted" | "completed"
+- On venue acceptance:
+  - mark gig/application as "accepted"
+  - store accepted_ensemble_id
+- Add endpoint to mark gig as "completed"
+
+Frontend:
+- Add "Upcoming Gigs" section for:
+  - Venue dashboard
+  - Ensemble leader
+- Add "Mark as Completed" action (visible only when accepted)
+
+---
+
+### 3. Verified Gig History (Source of Truth)
+Backend:
+- Create endpoints:
+  - /api/history/musician
+  - /api/history/venue
+- Return list of completed gigs with metadata:
+  date, venue/ensemble name, status
+
+Frontend:
+- Create GigHistory page/component
+- Replace hardcoded verified_gig_count:
+  verified_gig_count = history.length
+- Make verified gig count clickable → history page
+
+---
+
+## IMPLEMENTATION ORDER
+1. Update backend models and status fields
+2. Fix analytics authorization and responses
+3. Add gig lifecycle persistence
+4. Add history endpoints
+5. Wire frontend to real data
+6. Remove hardcoded counts
+
+Add clear comments explaining state transitions and role checks.

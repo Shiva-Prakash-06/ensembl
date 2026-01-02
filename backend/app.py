@@ -16,6 +16,7 @@ from blueprints.venues import venues_bp
 from blueprints.gigs import gigs_bp
 from blueprints.admin import admin_bp
 from blueprints.analytics import analytics_bp  # Phase 5
+from blueprints.history import history_bp  # Phase 2 Fix: Verified Gig History
 
 
 def create_app(config_class=Config):
@@ -23,8 +24,8 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Enable CORS for frontend communication
-    CORS(app)
+    # Enable CORS for frontend communication with credentials support
+    CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
     
     # Initialize database
     db.init_app(app)
@@ -39,6 +40,7 @@ def create_app(config_class=Config):
     app.register_blueprint(gigs_bp, url_prefix='/api/gigs')
     app.register_blueprint(admin_bp)  # Admin blueprint has its own prefix
     app.register_blueprint(analytics_bp)  # Phase 5: Analytics blueprint
+    app.register_blueprint(history_bp)  # Phase 2 Fix: Verified Gig History
     
     # Create tables on first run
     with app.app_context():
